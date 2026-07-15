@@ -11,7 +11,14 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // "native" keeps local dev working (Windows/Mac/whatever host runs `prisma generate`).
+  // "debian-openssl-3.0.x" is explicit for the Docker build: node:20-slim is Debian
+  // Bookworm (OpenSSL 3.0), but Prisma's own auto-detection inside that image
+  // guesses "openssl-1.1.x" and grabs the wrong engine binary, which then fails
+  // at runtime with a generic "Schema engine error". Being explicit here bypasses
+  // that faulty auto-detection entirely.
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 model User {
