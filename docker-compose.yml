@@ -14,7 +14,11 @@ services:
     volumes:
       - db-data:/app/data
     entrypoint: ["sh", "-c"]
-    command: ["npx prisma db push --skip-generate && npm run db:seed"]
+    # migrate runs as root (the `builder` stage has no USER directive), so the
+    # SQLite file it creates is root-owned. `app` runs as the non-root `nextjs`
+    # user (uid/gid 1001, see the `runner` stage) and would otherwise fail with
+    # "attempt to write a readonly database" — chown the volume to match before exiting.
+    command: ["npx prisma db push --skip-generate && npm run db:seed && chown -R 1001:1001 /app/data"]
 
   app:
     build:
