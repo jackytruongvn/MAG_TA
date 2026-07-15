@@ -1,0 +1,40 @@
+services:
+  # One-off init: creates the SQLite schema and seeds default config, then
+  # exits. Uses the `builder` stage because it has the full devDependencies
+  # (prisma CLI, tsx) that the slim `runner` image deliberately excludes.
+  # Safe to run on every `up` — both db push and the seed script are idempotent.
+  migrate:
+    build:
+      context: .
+      target: builder
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=file:/app/data/dev.db
+    volumes:
+      - db-data:/app/data
+    entrypoint: ["sh", "-c"]
+    command: ["npx prisma db push --skip-generate && npm run db:seed"]
+
+  app:
+    build:
+      context: .
+      target: runner
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    environment:
+      # Overrides the .env value so the SQLite file lives on a persisted
+      # volume instead of the container's ephemeral filesystem.
+      - DATABASE_URL=file:/app/data/dev.db
+      - PORT=3001
+    volumes:
+      - db-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  db-data:

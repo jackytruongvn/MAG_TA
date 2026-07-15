@@ -215,6 +215,35 @@ npm test        # vitest unit tests (date + Excel paste helpers)
 
 The scheduler runs **inside the Next.js server process** (see `src/instrumentation.ts`). If you deploy to a serverless platform where no process stays alive, disable it (`SCHEDULER_ENABLED=false`) and call `POST /api/scheduler/run-once` from an external cron (with an admin session) instead.
 
+### 5b. Running with Docker
+
+Requires Docker with Compose v2 (`docker compose`, not the older `docker-compose`).
+
+```bash
+cp .env.example .env   # fill in the values as in §2/§3
+docker compose up --build
+```
+
+This builds two images from the same multi-stage [Dockerfile](Dockerfile):
+- **`migrate`** — a one-off container (uses the `builder` stage, which still has the Prisma CLI and `tsx`) that runs `prisma db push` + the seed script against the SQLite file on a named volume, then exits. Safe to run on every `up` — both steps are idempotent.
+- **`app`** — the slim `runner` stage (Next.js standalone output), starts only after `migrate` finishes successfully, serves on `http://localhost:3001`.
+
+The SQLite file lives on the `db-data` named volume (mounted at `/app/data`, with `DATABASE_URL` overridden to match — see [docker-compose.yml](docker-compose.yml)), so data survives `docker compose down` / rebuilds. To wipe it and start fresh:
+
+```bash
+docker compose down -v   # -v also removes the db-data volume
+```
+
+Useful commands:
+
+```bash
+docker compose logs -f app      # tail app logs
+docker compose exec app sh      # shell into the running app container
+docker compose down             # stop (keeps the volume)
+```
+
+For PostgreSQL in Docker instead of SQLite, add a `postgres` service to `docker-compose.yml` and point `DATABASE_URL` at it (see §4 for the schema.prisma provider change).
+
 ---
 
 ## 6. Email sending logic
