@@ -1,0 +1,136 @@
+// HR TA Onboarding Input Portal - Prisma schema
+//
+// NOTE: designed to be portable between SQLite (local/dev) and PostgreSQL (prod).
+// - Enum-like fields use String + app-level validation (SQLite has no enums).
+// - JSON payloads are stored as String (SQLite has no Json type). Switching to
+//   PostgreSQL only requires changing the datasource provider + DATABASE_URL.
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String    @id @default(cuid())
+  microsoftId String?   @unique
+  email       String    @unique
+  displayName String?
+  role        String    @default("TA") // ADMIN | TA | VIEWER
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model OnboardingRequest {
+  id             String  @id @default(cuid())
+  requestType    String // CREATE | UPDATE | CANCELLED
+  batchId        String?
+  idempotencyKey String  @unique @default(cuid())
+
+  salutation       String?
+  fullName         String
+  dob              String? // date-only ISO yyyy-MM-dd (never a UTC datetime -> no timezone shift)
+  positionEng      String?
+  positionVie      String?
+  jobLevel         String?
+  division         String?
+  departmentEng    String?
+  departmentVie    String?
+  functionEng      String?
+  functionVie      String?
+  startingDate     String? // date-only ISO yyyy-MM-dd
+  location         String?
+  officeLocation   String?
+  project          String?
+  lineManager      String?
+  lineManagerEmail String?
+  workEmail        String? // Yes | No | ''
+  phoneNumber      String? // always text, never converted to number
+  company          String?
+  lienQuan         String?
+
+  priority String  @default("NORMAL") // NORMAL | URGENT
+  cc       String? // multiple emails separated by ; or ,
+  notes    String?
+
+  // UPDATE-type extra fields
+  updateReason  String?
+  fieldsChanged String? // drives text-color highlighting of changed columns in the outgoing email
+
+  // CANCELLED-type extra field
+  cancelReason String?
+
+  // Filled in by TA once IT replies with the actual account created (e.g. ngoctb1@masterisegroup.com)
+  accountEmail String?
+
+  status          String    @default("DRAFT") // DRAFT | PENDING | SCHEDULED | SENT | FAILED | CANCELLED
+  scheduledSendAt DateTime?
+  sentAt          DateTime?
+  sendError       String?
+  emailSubject    String?
+  emailBodyHtml   String?
+
+  createdByEmail   String
+  updatedByEmail   String?
+  submittedByEmail String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  emailLogs EmailSendLog[]
+
+  @@index([status])
+  @@index([requestType])
+  @@index([createdByEmail])
+  @@index([scheduledSendAt])
+  @@index([batchId])
+  @@map("onboarding_requests")
+}
+
+model AppConfig {
+  key            String   @id
+  valueJson      String
+  updatedByEmail String?
+  updatedAt      DateTime @updatedAt
+
+  @@map("app_config")
+}
+
+model EmailSendLog {
+  id            String             @id @default(cuid())
+  requestId     String?
+  request       OnboardingRequest? @relation(fields: [requestId], references: [id])
+  requestType   String?
+  toRecipients  String
+  ccRecipients  String?
+  subject       String
+  bodyHtml      String
+  status        String // SENT | FAILED
+  graphMessageId String?
+  errorMessage  String?
+  sentBy        String? // system mailbox / trigger info
+  sentAt        DateTime?
+  createdAt     DateTime           @default(now())
+
+  @@index([requestId])
+  @@map("email_send_logs")
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  entityType   String // REQUEST | CONFIG | USER
+  entityId     String
+  action       String // CREATE | UPDATE | SUBMIT | SEND_URGENT | SENT | FAILED | RETRY | RESEND | CONFIG_UPDATE | LOGIN | BULK_EDIT
+  oldValueJson String?
+  newValueJson String?
+  actorEmail   String
+  createdAt    DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}

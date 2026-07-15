@@ -1,0 +1,45 @@
+/** Client-side shape of an onboarding_requests record (API JSON). */
+export interface RequestRecord {
+  id: string;
+  requestType: string;
+  batchId: string | null;
+  salutation: string | null;
+  fullName: string;
+  dob: string | null;
+  positionEng: string | null;
+  positionVie: string | null;
+  jobLevel: string | null;
+  division: string | null;
+  departmentEng: string | null;
+  departmentVie: string | null;
+  functionEng: string | null;
+  functionVie: string | null;
+  startingDate: string | null;
+  location: string | null;
+  officeLocation: string | null;
+  project: string | null;
+  lineManager: string | null;
+  lineManagerEmail: string | null;
+  workEmail: string | null;
+  phoneNumber: string | null;
+  company: string | null;
+  lienQuan: string | null;
+  priority: string;
+  cc: string | null;
+  notes: string | null;
+  updateReason: string | null;
+  fieldsChanged: string | null;
+  cancelReason: string | null;
+  accountEmail: string | null;
+  status: string;
+  scheduledSendAt: string | null;
+  sentAt: string | null;
+  sendError: string | null;
+  emailSubject: string | null;
+  emailBodyHtml: string | null;
+  createdByEmail: string;
+  updatedByEmail: string | null;
+  submittedByEmail: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
