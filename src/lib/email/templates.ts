@@ -23,6 +23,18 @@ function cellDisplay(key: string, value: string | undefined): string {
   return v;
 }
 
+/**
+ * Explicit per-column pixel width. Email clients (Outlook/Word engine, Gmail's
+ * own layout pass, etc.) routinely squeeze `table-layout:auto` columns down
+ * to fit a constrained viewport regardless of `nowrap`, ignoring the natural
+ * content width. Giving each column a concrete width (both the legacy HTML
+ * `width` attribute and a CSS min-width) is the standard email-safe fix —
+ * reuses the same width already tuned for the entry grid.
+ */
+function columnWidthPx(key: string): number {
+  return ALL_COLUMNS[key]?.width ?? 120;
+}
+
 /** Render the {{RowsTable}} HTML table for a request type. */
 export function buildRowsTableHtml(type: RequestType, rows: RowData[]): string {
   const keys = EMAIL_TABLE_COLUMNS[type];
@@ -30,7 +42,10 @@ export function buildRowsTableHtml(type: RequestType, rows: RowData[]): string {
   // which causes headers/cells to wrap mid-word regardless of the CSS. The legacy
   // HTML `nowrap` attribute is the standard Outlook-safe workaround alongside it.
   const th = keys
-    .map((k) => `<th nowrap="nowrap" style="border:1px solid #999;padding:4px 8px;background:#8b5e34;color:#fff;white-space:nowrap;font-size:12px;">${escapeHtml(ALL_COLUMNS[k].label)}</th>`)
+    .map((k) => {
+      const w = columnWidthPx(k);
+      return `<th nowrap="nowrap" width="${w}" style="border:1px solid #999;padding:4px 8px;background:#8b5e34;color:#fff;white-space:nowrap;font-size:12px;min-width:${w}px;">${escapeHtml(ALL_COLUMNS[k].label)}</th>`;
+    })
     .join('');
   const trs = rows
     .map((row) => {
@@ -39,10 +54,11 @@ export function buildRowsTableHtml(type: RequestType, rows: RowData[]): string {
       const changedKeys = type === 'UPDATE' ? parseChangedFieldKeys(row.fieldsChanged, keys) : new Set<string>();
       const tds = keys
         .map((k) => {
+          const w = columnWidthPx(k);
           const style = changedKeys.has(k)
-            ? `border:1px solid #999;padding:4px 8px;font-size:12px;white-space:nowrap;${CHANGED_FIELD_STYLE}`
-            : 'border:1px solid #999;padding:4px 8px;font-size:12px;white-space:nowrap;';
-          return `<td nowrap="nowrap" style="${style}">${escapeHtml(cellDisplay(k, row[k]))}</td>`;
+            ? `border:1px solid #999;padding:4px 8px;font-size:12px;white-space:nowrap;min-width:${w}px;${CHANGED_FIELD_STYLE}`
+            : `border:1px solid #999;padding:4px 8px;font-size:12px;white-space:nowrap;min-width:${w}px;`;
+          return `<td nowrap="nowrap" width="${w}" style="${style}">${escapeHtml(cellDisplay(k, row[k]))}</td>`;
         })
         .join('');
       return `<tr>${tds}</tr>`;
