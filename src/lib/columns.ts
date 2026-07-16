@@ -44,6 +44,7 @@ export const ALL_COLUMNS: Record<string, ColumnDef> = {
   lineManager: C('lineManager', 'Line Manager', ['linemanager', 'manager', 'quanlytructiep'], 'text', { width: 170 }),
   lineManagerEmail: C('lineManagerEmail', 'Line Manager email', ['linemanageremail', 'manageremail', 'emailquanly'], 'email', { width: 210 }),
   workEmail: C('workEmail', 'Work Email', ['workemail', 'email', 'emailcongviec'], 'text', { width: 100 }),
+  accountEmail: C('accountEmail', 'Account', ['account', 'accountemail', 'taikhoan'], 'email', { width: 210 }),
   phoneNumber: C('phoneNumber', 'Phone Number', ['phonenumber', 'phone', 'mobile', 'sodienthoai', 'sdt'], 'text', { width: 130 }),
   company: C('company', 'Company', ['company', 'congty'], 'text', { width: 140 }),
   lienQuan: C('lienQuan', 'Liên quân', ['lienquan', 'coalition', 'coalitioncode'], 'text', { width: 110 }),
@@ -77,14 +78,14 @@ export const PAGE_COLUMNS: Record<RequestType, string[]> = {
   UPDATE: [
     'salutation', 'fullName', 'dob', 'positionEng', 'positionVie', 'jobLevel', 'division',
     'departmentEng', 'departmentVie', 'functionEng', 'functionVie', 'startingDate', 'location',
-    'officeLocation', 'project', 'lineManager', 'lineManagerEmail', 'workEmail', 'phoneNumber',
+    'officeLocation', 'project', 'lineManager', 'lineManagerEmail', 'workEmail', 'accountEmail', 'phoneNumber',
     'company', 'lienQuan', 'updateReason', 'fieldsChanged',
     'priority', 'cc', 'notes',
   ],
   CANCELLED: [
     'salutation', 'fullName', 'dob', 'positionEng', 'positionVie', 'jobLevel', 'division',
     'departmentEng', 'departmentVie', 'functionEng', 'functionVie', 'startingDate', 'location',
-    'officeLocation', 'project', 'lineManager', 'lineManagerEmail', 'workEmail', 'phoneNumber',
+    'officeLocation', 'project', 'lineManager', 'lineManagerEmail', 'workEmail', 'accountEmail', 'phoneNumber',
     'company', 'lienQuan', 'cancelReason', 'priority', 'cc', 'notes',
   ],
 };
@@ -100,13 +101,13 @@ export const EMAIL_TABLE_COLUMNS: Record<RequestType, string[]> = {
   UPDATE: [
     'salutation', 'fullName', 'dob', 'positionEng', 'positionVie', 'jobLevel', 'division',
     'departmentEng', 'departmentVie', 'functionEng', 'functionVie', 'startingDate', 'location',
-    'officeLocation', 'project', 'lineManager', 'lineManagerEmail', 'workEmail', 'phoneNumber',
+    'officeLocation', 'project', 'lineManager', 'lineManagerEmail', 'workEmail', 'accountEmail', 'phoneNumber',
     'company', 'lienQuan', 'fieldsChanged',
   ],
   CANCELLED: [
     'salutation', 'fullName', 'dob', 'positionEng', 'positionVie', 'jobLevel', 'division',
     'departmentEng', 'departmentVie', 'functionEng', 'functionVie', 'startingDate', 'location',
-    'officeLocation', 'project', 'lineManager', 'lineManagerEmail', 'workEmail', 'phoneNumber',
+    'officeLocation', 'project', 'lineManager', 'lineManagerEmail', 'workEmail', 'accountEmail', 'phoneNumber',
     'company', 'lienQuan',
   ],
 };

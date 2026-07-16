@@ -31,17 +31,22 @@ import type { EmailPreview, RowData } from '@/types';
 import { formatDateOnly } from '@/lib/dates';
 import { cn, maskDob, maskPhone, isValidEmail } from '@/lib/utils';
 
-/** Common identifying fields carried over when prefilling an Update request from an existing row. */
-const UPDATE_PREFILL_FIELDS = [
+/**
+ * Common identifying fields carried over when prefilling an Update or
+ * Cancelled request from an existing row — including `accountEmail` so the
+ * real account IT created (once recorded via the Account column) flows into
+ * whichever follow-up request the TA creates next, instead of being lost.
+ */
+const PREFILL_FIELDS = [
   'salutation', 'fullName', 'dob', 'positionEng', 'positionVie', 'jobLevel', 'division',
   'departmentEng', 'departmentVie', 'functionEng', 'functionVie', 'startingDate', 'location',
-  'officeLocation', 'project', 'lineManager', 'lineManagerEmail', 'workEmail', 'phoneNumber',
+  'officeLocation', 'project', 'lineManager', 'lineManagerEmail', 'workEmail', 'accountEmail', 'phoneNumber',
   'company', 'lienQuan', 'cc', 'notes',
 ] as const;
 
-function recordToUpdateRow(r: RequestRecord): RowData {
+function recordToPrefillRow(r: RequestRecord): RowData {
   const row: RowData = { priority: 'Normal' };
-  for (const f of UPDATE_PREFILL_FIELDS) row[f] = ((r as unknown as Record<string, string | null>)[f]) ?? '';
+  for (const f of PREFILL_FIELDS) row[f] = ((r as unknown as Record<string, string | null>)[f]) ?? '';
   return row;
 }
 
@@ -306,12 +311,12 @@ export function DashboardView() {
 
   const selectedIds = Object.keys(rowSelection).filter((k) => rowSelection[k]);
 
-  function createUpdateFromSelection() {
+  function createFromSelection(type: 'UPDATE' | 'CANCELLED') {
     const selectedRecords = data.filter((r) => selectedIds.includes(r.id));
     if (selectedRecords.length === 0) return;
-    const rows = selectedRecords.map(recordToUpdateRow);
-    sessionStorage.setItem('prefillRows_UPDATE', JSON.stringify(rows));
-    router.push('/update');
+    const rows = selectedRecords.map(recordToPrefillRow);
+    sessionStorage.setItem(`prefillRows_${type}`, JSON.stringify(rows));
+    router.push(type === 'UPDATE' ? '/update' : '/cancelled');
   }
 
   async function saveAccountEmail(id: string, value: string) {
@@ -530,9 +535,16 @@ export function DashboardView() {
               <button
                 className="btn-outline btn-sm"
                 title="Prefill the Update page with this row's data"
-                onClick={createUpdateFromSelection}
+                onClick={() => createFromSelection('UPDATE')}
               >
                 📝 Create Update
+              </button>
+              <button
+                className="btn-outline btn-sm"
+                title="Prefill the Cancelled page with this row's data"
+                onClick={() => createFromSelection('CANCELLED')}
+              >
+                🚫 Create Cancelled
               </button>
               <button
                 className="btn-primary btn-sm"

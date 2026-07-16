@@ -20,7 +20,7 @@ function requestToRow(r: OnboardingRequest): RowData {
     functionEng: r.functionEng ?? '', functionVie: r.functionVie ?? '',
     startingDate: r.startingDate ?? '', location: r.location ?? '', officeLocation: r.officeLocation ?? '',
     project: r.project ?? '', lineManager: r.lineManager ?? '', lineManagerEmail: r.lineManagerEmail ?? '',
-    workEmail: r.workEmail ?? '', phoneNumber: r.phoneNumber ?? '', company: r.company ?? '',
+    workEmail: r.workEmail ?? '', accountEmail: r.accountEmail ?? '', phoneNumber: r.phoneNumber ?? '', company: r.company ?? '',
     lienQuan: r.lienQuan ?? '', priority: r.priority, cc: r.cc ?? '', notes: r.notes ?? '',
     updateReason: r.updateReason ?? '', fieldsChanged: r.fieldsChanged ?? '',
     cancelReason: r.cancelReason ?? '',

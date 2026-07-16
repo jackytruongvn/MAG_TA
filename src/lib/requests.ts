@@ -16,7 +16,7 @@ import type { AppConfigShape, RequestType, RowData } from '@/types';
 const ROW_FIELDS = [
   'salutation', 'fullName', 'dob', 'positionEng', 'positionVie', 'jobLevel', 'division',
   'departmentEng', 'departmentVie', 'functionEng', 'functionVie', 'startingDate', 'location',
-  'officeLocation', 'project', 'lineManager', 'lineManagerEmail', 'workEmail', 'phoneNumber',
+  'officeLocation', 'project', 'lineManager', 'lineManagerEmail', 'workEmail', 'accountEmail', 'phoneNumber',
   'company', 'lienQuan', 'cc', 'notes', 'updateReason', 'fieldsChanged', 'cancelReason',
 ] as const;
 
